@@ -41,6 +41,27 @@ def test_citing_an_article_that_was_not_retrieved_fails():
     ]
 
 
+def test_citing_a_retrieved_past_ticket_next_to_an_article_passes():
+    session = session_with("tracking parcel")
+    session.search_past_tickets("parcel arrived")
+    assert "PT-0002" in session.past_seen
+    assert failures(decision={**CLOSE, "cited_articles": ["HC-05", "PT-0002"]}, session=session) == []
+
+
+def test_citing_only_past_tickets_fails():
+    session = session_with("tracking parcel")
+    session.search_past_tickets("parcel arrived")
+    assert ("citations", "cites no help-centre article") in failures(
+        decision={**CLOSE, "cited_articles": ["PT-0002"]}, session=session
+    )
+
+
+def test_citing_a_past_ticket_that_was_not_retrieved_fails():
+    assert ("citations", "cites PT-0001, which was not retrieved") in failures(
+        decision={**CLOSE, "cited_articles": ["HC-05", "PT-0001"]}
+    )
+
+
 def test_citing_something_that_is_not_an_article_fails():
     assert checks_failed(decision={**CLOSE, "cited_articles": ["delivery article"]}) == ["citations"]
 

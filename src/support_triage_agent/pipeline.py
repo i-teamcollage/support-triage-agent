@@ -5,12 +5,15 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from .agent import decide, gather
+from .agent import decide, decide_again, gather
 from .checks import RETRIEVAL_THRESHOLD, Failure, check_close, normalize_article_id
 from .knowledge import KnowledgeBase, Session, money
 from .llm import LLM, InvalidOutput
 from .rules import Hit, describe_hits, hard_rules
 from .ticket import Ticket
+
+# Problems a rewritten reply can fix. The others are about the ticket itself, so they go to a person.
+REPAIRABLE = {"citations", "grounding"}
 
 
 @dataclass
@@ -96,12 +99,31 @@ def triage(ticket: Ticket, llm: LLM, kb: KnowledgeBase, threshold: float = RETRI
     seconds += reply.seconds
     decision = reply.data
 
+    decided_by = "model"
+    if decision["outcome"] == "close":
+        failures = check_close(decision, ticket, session, threshold)
+        if failures and all(failure.check in REPAIRABLE for failure in failures):
+            # One chance to fix the reply; if it still fails, a person gets it with the reasons.
+            try:
+                second = decide_again(llm, ticket, session, decision, [f.reason for f in failures], label=ticket.id)
+            except InvalidOutput:
+                second = None
+            if second is not None:
+                seconds += second.seconds
+                decision = second.data
+                decided_by = "model after repair"
+                failures = check_close(decision, ticket, session, threshold) if decision["outcome"] == "close" else []
     if decision["outcome"] == "close":
         cited = [aid for written in decision["cited_articles"] if (aid := normalize_article_id(written))]
-        failures = check_close(decision, ticket, session, threshold)
         if not failures:
             return TicketResult(
-                ticket.id, "close", "model", team=decision["team"], reply=decision["reply"], cited=cited, **looked_up()
+                ticket.id,
+                "close",
+                decided_by,
+                team=decision["team"],
+                reply=decision["reply"],
+                cited=cited,
+                **looked_up(),
             )
         return TicketResult(
             ticket.id,

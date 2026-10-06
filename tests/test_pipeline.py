@@ -47,9 +47,26 @@ def test_a_proven_close_is_closed(tmp_path):
     assert len(model.requests) == 3
 
 
-def test_a_close_that_fails_a_check_is_routed_with_a_handover(tmp_path):
+def test_a_close_that_fails_a_check_gets_one_repair_and_is_closed_when_fixed(tmp_path):
     wrong_date = {**CLOSE, "reply": "Your order arrives on 5 October 2026. Hollinvale Home customer service"}
-    result, _ = run(tmp_path, LOOKUPS, "DONE", wrong_date)
+    result, model = run(tmp_path, LOOKUPS, "DONE", wrong_date, CLOSE)
+    assert result.outcome == "close"
+    assert result.decided_by == "model after repair"
+    assert result.reply == CLOSE["reply"]
+    assert "5 October 2026" in model.requests[-1]["messages"][-1]["content"]
+
+
+def test_a_repair_that_chooses_route_is_routed_by_the_model(tmp_path):
+    wrong_date = {**CLOSE, "reply": "Your order arrives on 5 October 2026. Hollinvale Home customer service"}
+    result, _ = run(tmp_path, LOOKUPS, "DONE", wrong_date, ROUTE)
+    assert result.outcome == "route"
+    assert result.decided_by == "model"
+    assert result.handover == ROUTE["handover"]
+
+
+def test_a_close_that_fails_a_check_twice_is_routed_with_a_handover(tmp_path):
+    wrong_date = {**CLOSE, "reply": "Your order arrives on 5 October 2026. Hollinvale Home customer service"}
+    result, _ = run(tmp_path, LOOKUPS, "DONE", wrong_date, wrong_date)
     assert result.outcome == "route"
     assert result.decided_by == "checks"
     assert result.team == "logistics"

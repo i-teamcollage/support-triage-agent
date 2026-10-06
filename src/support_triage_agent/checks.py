@@ -41,14 +41,29 @@ def normalize_article_id(value: Any) -> str | None:
     return f"HC-{int(match.group(1)):02d}" if match else None
 
 
+_PAST_TICKET = re.compile(r"\bPT[\s-]?(\d{4})\b", re.IGNORECASE)
+
+
 def _citations(cited: list[str], session: Session) -> list[Failure]:
-    failures = []
+    """Cited articles must have been retrieved. A retrieved past ticket may be cited too, but a reply
+    still has to rest on at least one help-centre article."""
+    failures, articles = [], 0
     for written in cited:
         article_id = normalize_article_id(written)
-        if article_id is None:
+        past = _PAST_TICKET.search(str(written))
+        if article_id is not None:
+            if article_id in session.retrieved:
+                articles += 1
+            else:
+                failures.append(Failure("citations", f"cites {article_id}, which was not retrieved"))
+        elif past is not None:
+            ticket_id = f"PT-{past.group(1)}"
+            if ticket_id not in session.past_seen:
+                failures.append(Failure("citations", f"cites {ticket_id}, which was not retrieved"))
+        else:
             failures.append(Failure("citations", f'cites "{written}", which is not an article id'))
-        elif article_id not in session.retrieved:
-            failures.append(Failure("citations", f"cites {article_id}, which was not retrieved"))
+    if articles == 0 and not failures:
+        failures.append(Failure("citations", "cites no help-centre article"))
     return failures
 
 
