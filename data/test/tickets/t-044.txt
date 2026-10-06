@@ -1,0 +1,10 @@
+From: Lucas Dubois
+Received: 2026-09-25 14:28
+Subject: Problem with my code
+
+Good morning,
+
+Your code AUTUMN15 gives 'Something went wrong' at checkout. Basket: €749.00. I'd like to order before the code runs out. It's for our new flat, so I'm a bit impatient.
+
+Thanks,
+Lucas

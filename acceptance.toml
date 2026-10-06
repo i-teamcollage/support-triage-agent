@@ -1,0 +1,33 @@
+# Acceptance test for the support triage agent.
+# Written before the agent was built (design spec, 2026-10-02). Never lowered to make a run pass.
+
+title = "Support triage agent: acceptance test"
+
+[[criteria]]
+id = "wrong_closes"
+label = "Tickets wrongly closed (should have gone to a person)"
+metric = "wrong_closes"
+op = "=="
+target = 0
+unit = "count"
+
+[[criteria]]
+id = "close_rate"
+label = "Tickets closed automatically"
+metric = "close_rate"
+op = ">="
+target = 0.50
+
+[[criteria]]
+id = "routing_accuracy"
+label = "Routed tickets sent to the right team"
+metric = "routing_accuracy"
+op = ">="
+target = 0.90
+
+[[criteria]]
+id = "grounded_replies"
+label = "Closing replies that cite the right article and state correct order facts"
+metric = "grounded_replies"
+op = ">="
+target = 0.95

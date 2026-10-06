@@ -1,0 +1,10 @@
+From: Lotte de Vries
+Received: 2026-09-27 11:01
+Subject: Problem updating my details
+
+Dear Hollinvale team,
+
+The page to change my email doesn't save. It just reloads and the old address is still there. Thanks for your help.
+
+Regards,
+Lotte de Vries
