@@ -128,6 +128,24 @@ def ollama_info(model: str, host: str | None = None) -> dict[str, str]:
     return {"ollama_version": version, "model_digest": digest}
 
 
+def linux_machine(proc: Path = Path("/proc")) -> str | None:
+    """For example "Intel Xeon Processor @ 2.10GHz, 4 cores, 16 GB", read from /proc. None elsewhere."""
+    try:
+        cpus = [
+            line.split(":", 1)[1].strip()
+            for line in (proc / "cpuinfo").read_text().splitlines()
+            if line.startswith("model name")
+        ]
+        kilobytes = next(
+            int(line.split()[1]) for line in (proc / "meminfo").read_text().splitlines() if line.startswith("MemTotal:")
+        )
+    except (OSError, StopIteration, ValueError, IndexError):
+        return None
+    if not cpus:
+        return None
+    return f"{cpus[0].replace('(R)', '').replace('(TM)', '')}, {len(cpus)} cores, {round(kilobytes / 2**20)} GB"
+
+
 def machine_description() -> str:
     """For example "Apple M4, 16 GB". Falls back to the platform name."""
     import platform
@@ -140,7 +158,7 @@ def machine_description() -> str:
         memory = int(subprocess.run(["sysctl", "-n", "hw.memsize"], capture_output=True, text=True, check=True).stdout)
         return f"{chip}, {round(memory / 2**30)} GB"
     except (OSError, subprocess.CalledProcessError, ValueError):
-        return f"{platform.system()} {platform.machine()}".strip() or "unknown machine"
+        return linux_machine() or f"{platform.system()} {platform.machine()}".strip() or "unknown machine"
 
 
 class LLM:
