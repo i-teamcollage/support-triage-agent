@@ -112,7 +112,7 @@ You need Python 3.11 or newer, nothing else.
 | File | What it does |
 |---|---|
 | [`rules.py`](src/support_triage_agent/rules.py) | Hard rules that hold a ticket before the model is asked: legal threats, data-protection requests, possible fraud, safety risks and instructions aimed at the agent. Also problem signals, such as a double charge or an error message, that stop a close. |
-| [`agent.py`](src/support_triage_agent/agent.py) | The model's two steps: a tool loop of at most 4 calls, then one decision held to a JSON schema. An invalid answer gets one retry, then goes to a person. |
+| [`agent.py`](src/support_triage_agent/agent.py) | The model's two steps: a tool loop of at most 4 calls, then one decision held to a JSON schema. A model that stops before it has searched the help centre is reminded once. An invalid answer gets one retry, then goes to a person. |
 | [`knowledge.py`](src/support_triage_agent/knowledge.py) | The three tools: BM25 search over the help centre and the past tickets, and the order lookup. They answer in plain text in a fixed order, so a stored run replays exactly. |
 | [`checks.py`](src/support_triage_agent/checks.py) | The confidence line. A close stands only if its citations, dates, amounts, order lookup and search score all check out and the rules agree. Otherwise it becomes a route with a handover. |
 | [`facts.py`](src/support_triage_agent/facts.py) | Dates and amounts written the way people write them (`7 October`, `07/10/2026`, the euro sign before or after the number, a comma or a point for the cents), turned into ISO dates and exact decimals before they are compared. |

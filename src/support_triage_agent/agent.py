@@ -56,6 +56,11 @@ Always search it at least once: a reply can only rest on articles you found.
 
 Do not write to the customer. When you have what you need, answer with the single word DONE."""
 
+SEARCH_REMINDER = (
+    "You have not searched the help centre yet. A reply can only rest on articles you found: search it now with "
+    "search_help_centre, then answer DONE."
+)
+
 DECISION_SYSTEM = f"""You are the first-line support agent of {SHOP}. Decide what happens to one customer ticket, \
 using only the ticket and the evidence below.
 
@@ -64,7 +69,8 @@ Choose one outcome:
 anything. This includes answers that are "no" or that ask the customer to take a step themselves: an order that \
 has shipped cannot be cancelled but can be returned; a return inside the return window is started by the customer \
 in their account; an item that the order record shows as shipped separately is on its way, with its status; a \
-return window that has closed. Write the reply and cite the articles it is based on.
+return window that has closed; a planned order that is over a limit the help centre gives, so that option is not \
+available for it. Write the reply and cite the articles it is based on.
 - route: a person has to act or check something: a refund or payment problem, an invoice to correct, a damaged \
 or wrong item, an item missing from a parcel when the order record shows no separate shipment for it, a parcel \
 that the order record shows as late or lost, a missed delivery or collection, a technical error. Choose the team \
@@ -106,23 +112,30 @@ def _ticket_block(ticket: Ticket) -> str:
 
 
 def gather(llm: LLM, ticket: Ticket, session: Session, label: str) -> float:
-    """Let the model call tools until it is done or has used its 4 calls. Returns the model's time in seconds."""
+    """Let the model call tools until it is done or has used its 4 calls. Returns the model's time in seconds.
+
+    A model that stops before it has searched the help centre is reminded once, while it has calls left.
+    """
     messages: list[dict[str, Any]] = [
         {"role": "system", "content": LOOP_SYSTEM},
         {"role": "user", "content": _ticket_block(ticket)},
     ]
-    seconds, made = 0.0, 0
-    for round_number in range(1, MAX_TOOL_CALLS + 1):
+    seconds, made, round_number, reminded = 0.0, 0, 0, False
+    while made < MAX_TOOL_CALLS:
+        round_number += 1
         reply = llm.chat(messages, tools=TOOLS, label=f"{label} tools {round_number}")
         seconds += reply.seconds
         if not reply.tool_calls:
-            break
+            searched = any(call["name"] == "search_help_centre" for call in session.calls)
+            if searched or reminded:
+                break
+            reminded = True
+            messages += [{"role": "assistant", "content": reply.text}, {"role": "user", "content": SEARCH_REMINDER}]
+            continue
         calls = reply.tool_calls[: MAX_TOOL_CALLS - made]
         results = [session.run(call) for call in calls]
         made += len(calls)
         messages += tool_turn(reply.text, calls, results)
-        if made >= MAX_TOOL_CALLS:
-            break
     return round(seconds, 3)
 
 

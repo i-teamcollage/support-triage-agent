@@ -108,7 +108,7 @@ def test_replay_without_a_stored_run_explains_what_to_do(tmp_path, capsys):
 def test_run_triages_one_ticket_given_as_text(tmp_path, capsys):
     root = workspace(tmp_path)
     order = json.loads((root / "data" / "shop" / "orders.jsonl").read_text(encoding="utf-8").splitlines()[0])
-    model = ScriptedModel(calls(("lookup_order", {"order_id": order["order_id"]})), "DONE", ROUTE)
+    model = ScriptedModel(calls(("lookup_order", {"order_id": order["order_id"]})), "DONE", "DONE", ROUTE)
     text = f"My parcel for {order['order_id']} is two weeks late and the tracking has not moved."
     assert main(["run", text], root=root, transport=model) == 0
     assert "routed to logistics" in capsys.readouterr().out

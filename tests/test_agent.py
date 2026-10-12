@@ -101,9 +101,9 @@ def test_gather_runs_the_tools_the_model_asks_for_then_stops(tmp_path):
 
 
 def test_the_first_request_explains_the_job_and_carries_the_ticket(tmp_path):
-    llm, model = llm_with(tmp_path, "DONE")
+    llm, model = llm_with(tmp_path, "DONE", "DONE")
     gather(llm, TICKET, shop().session(TICKET_DATE), label="t-001")
-    system, user = model.requests[0]["messages"]
+    system, user = model.requests[0]["messages"][:2]
     assert system["role"] == "system" and "at most 4 tool calls" in system["content"]
     assert TEXT.strip() in user["content"]
 
@@ -118,8 +118,33 @@ def test_gather_stops_after_four_tool_calls(tmp_path):
     assert len(model.requests) == 2
 
 
+def test_a_model_that_stops_without_searching_the_help_centre_is_reminded(tmp_path):
+    llm, model = llm_with(
+        tmp_path,
+        calls(("lookup_order", {"order_id": "HV-204518"})),
+        "DONE",
+        calls(("search_help_centre", {"query": "tracking parcel"})),
+        "DONE",
+    )
+    session = shop().session(TICKET_DATE)
+    gather(llm, TICKET, session, label="t-001")
+    assert "HC-05" in session.retrieved
+    assert len(model.requests) == 4
+    messages = model.requests[2]["messages"]
+    assert messages[4] == {"role": "assistant", "content": "DONE"}
+    assert messages[5]["role"] == "user" and "not searched the help centre" in messages[5]["content"]
+
+
+def test_the_reminder_to_search_comes_only_once(tmp_path):
+    llm, model = llm_with(tmp_path, "DONE", "DONE")
+    session = shop().session(TICKET_DATE)
+    gather(llm, TICKET, session, label="t-001")
+    assert session.calls == []
+    assert len(model.requests) == 2
+
+
 def test_gather_returns_the_time_the_model_took(tmp_path):
-    llm, _ = llm_with(tmp_path, "DONE")
+    llm, _ = llm_with(tmp_path, "DONE", "DONE")
     assert gather(llm, TICKET, shop().session(TICKET_DATE), label="t-001") >= 0.0
 
 
@@ -155,6 +180,12 @@ def test_the_decision_prompt_asks_for_the_amount_when_the_customer_asks_what_som
     rules = system["content"].split("Rules for a reply (close only):", 1)[1].split("Handover (route only)", 1)[0]
     assert "asks what something costs" in rules
     assert "state the amount from the cited article" in rules
+
+
+def test_the_decision_prompt_counts_a_planned_order_over_a_limit_as_a_close():
+    system, _ = decision_messages(TICKET, shop().session(TICKET_DATE))
+    close = system["content"].split("- close:", 1)[1].split("- route:", 1)[0]
+    assert "a planned order that is over a limit the help centre gives" in close
 
 
 def test_the_decision_prompt_says_when_nothing_was_found():

@@ -94,7 +94,7 @@ def test_a_route_keeps_the_model_handover(tmp_path):
 
 def test_the_model_can_hold_a_ticket_too(tmp_path):
     hold = {**ROUTE, "outcome": "hold", "hold_reason": "The customer mentions an injury."}
-    result, _ = run(tmp_path, "DONE", hold)
+    result, _ = run(tmp_path, "DONE", "DONE", hold)
     assert (result.outcome, result.decided_by, result.hold_reason) == (
         "hold",
         "model",
@@ -103,6 +103,6 @@ def test_the_model_can_hold_a_ticket_too(tmp_path):
 
 
 def test_an_unreadable_decision_goes_to_a_person(tmp_path):
-    result, _ = run(tmp_path, "DONE", "not json", "{}")
+    result, _ = run(tmp_path, "DONE", "DONE", "not json", "{}")
     assert (result.outcome, result.decided_by) == ("hold", "unreadable answer")
     assert result.error is not None
