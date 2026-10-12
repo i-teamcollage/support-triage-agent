@@ -69,8 +69,9 @@ Choose one outcome:
 anything. This includes answers that are "no" or that ask the customer to take a step themselves: an order that \
 has shipped cannot be cancelled but can be returned; a return inside the return window is started by the customer \
 in their account; an item that the order record shows as shipped separately is on its way, with its status; a \
-return window that has closed; a planned order that is over a limit the help centre gives, so that option is not \
-available for it. Write the reply and cite the articles it is based on.
+return window that has closed. A question asked before ordering, such as what something costs or whether there \
+is a minimum or a maximum, is answered by the help centre alone: a missing order is not a reason to route. Write \
+the reply and cite the articles it is based on.
 - route: a person has to act or check something: a refund or payment problem, an invoice to correct, a damaged \
 or wrong item, an item missing from a parcel when the order record shows no separate shipment for it, a parcel \
 that the order record shows as late or lost, a missed delivery or collection, a technical error. Choose the team \

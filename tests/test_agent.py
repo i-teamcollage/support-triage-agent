@@ -182,10 +182,12 @@ def test_the_decision_prompt_asks_for_the_amount_when_the_customer_asks_what_som
     assert "state the amount from the cited article" in rules
 
 
-def test_the_decision_prompt_counts_a_planned_order_over_a_limit_as_a_close():
+def test_the_decision_prompt_closes_a_question_asked_before_ordering_without_an_order():
     system, _ = decision_messages(TICKET, shop().session(TICKET_DATE))
     close = system["content"].split("- close:", 1)[1].split("- route:", 1)[0]
-    assert "a planned order that is over a limit the help centre gives" in close
+    assert "A question asked before ordering" in close
+    assert "a missing order is not a reason to route" in close
+    assert "over a limit" not in close
 
 
 def test_the_decision_prompt_says_when_nothing_was_found():
