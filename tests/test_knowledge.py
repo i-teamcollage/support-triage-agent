@@ -1,9 +1,10 @@
 from datetime import date
+from pathlib import Path
 
 import pytest
 from tiny_shop import TICKET_DATE, shop
 
-from support_triage_agent.knowledge import find_order_ids, normalize_order_id, render_order
+from support_triage_agent.knowledge import KnowledgeBase, find_order_ids, normalize_order_id, render_order
 from support_triage_agent.llm import ToolCall
 
 
@@ -35,6 +36,14 @@ def test_help_centre_search_returns_whole_articles_best_first():
     assert "free for orders over €75" in text
     assert session.retrieved[0] == "HC-04"
     assert session.top_score == session.best_scores["HC-04"] > 0
+
+
+@pytest.mark.parametrize("query", ["delivery cost", "express delivery cost"])
+def test_a_question_in_the_singular_finds_the_article_written_in_the_plural(query):
+    """The help centre says "Delivery times and costs"; a customer asks what delivery "cost"."""
+    help_centre = KnowledgeBase.from_dir(Path(__file__).resolve().parents[1] / "data" / "shop")
+    [(best, _), *_] = help_centre.help_index.search(query)
+    assert best == "HC-04"
 
 
 def test_search_results_are_the_same_every_time():

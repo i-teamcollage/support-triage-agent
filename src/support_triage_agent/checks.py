@@ -27,7 +27,7 @@ from .ticket import Ticket
 # Tuned on the practice split only: half the weakest BM25 score the right article reaches there when it is
 # searched by its title, rounded down. A query made of one common word ("order", "delivery") stays below it.
 # tests/test_ceiling.py recomputes it, so a change to the help centre or the practice split asks for a re-tune.
-RETRIEVAL_THRESHOLD = 2.1
+RETRIEVAL_THRESHOLD = 1.6
 
 
 @dataclass(frozen=True)

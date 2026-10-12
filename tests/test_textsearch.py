@@ -15,6 +15,14 @@ def test_tokenize_keeps_numbers_and_identifiers():
     assert tokenize("Order NH-1042 failed with HTTP 429") == ["order", "nh", "1042", "failed", "http", "429"]
 
 
+def test_tokenize_reads_a_plural_as_its_singular():
+    assert tokenize("Delivery costs, countries and items") == ["delivery", "cost", "country", "item"]
+
+
+def test_tokenize_leaves_words_that_only_end_in_s_alone():
+    assert tokenize("express address status addresses") == ["express", "address", "status", "address"]
+
+
 def test_most_relevant_document_comes_first():
     results = BM25(ARTICLES).search("can I return my item")
     assert results[0][0] == "returns"

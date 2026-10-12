@@ -83,6 +83,9 @@ problems
 Rules for a reply (close only):
 - Answer only from the evidence. When the ticket is about an order, state the facts from the order record that \
 answer it, such as the expected delivery date, the return window, the refund amount and date, or the due date.
+- When the customer asks what something costs, how much they pay or whether it is free, state the amount from the \
+cited article that answers it, and the order value from which it is free when the article gives one. A reply that \
+only points to the article does not answer the question.
 - Every date and amount in the reply must come from the order record or from an article you cite. Do not repeat \
 a date or an amount that only the customer wrote, such as a price, a basket total or the day of the ticket.
 - Cite the ids of the help-centre articles you used, for example ["HC-04"]. Cite only articles listed in the \

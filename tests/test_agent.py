@@ -150,6 +150,13 @@ def test_the_decision_prompt_holds_the_ticket_and_all_the_evidence():
     assert "[PT-0002]" in user["content"]
 
 
+def test_the_decision_prompt_asks_for_the_amount_when_the_customer_asks_what_something_costs():
+    system, _ = decision_messages(TICKET, shop().session(TICKET_DATE))
+    rules = system["content"].split("Rules for a reply (close only):", 1)[1].split("Handover (route only)", 1)[0]
+    assert "asks what something costs" in rules
+    assert "state the amount from the cited article" in rules
+
+
 def test_the_decision_prompt_says_when_nothing_was_found():
     _, user = decision_messages(TICKET, shop().session(TICKET_DATE))
     assert "Orders looked up: none." in user["content"]

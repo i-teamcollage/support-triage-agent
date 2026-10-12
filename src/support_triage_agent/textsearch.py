@@ -13,8 +13,20 @@ STOPWORDS = frozenset(
 )
 
 
+def singular(word: str) -> str:
+    """costs -> cost, countries -> country, addresses -> address; express, status and bus stay as they are."""
+    if len(word) <= 3 or not word.endswith("s") or word.endswith(("ss", "us", "is")):
+        return word
+    if word.endswith("sses"):
+        return word[:-2]
+    if word.endswith("ies") and len(word) > 4:
+        return word[:-3] + "y"
+    return word[:-1]
+
+
 def tokenize(text: str) -> list[str]:
-    return [token for token in re.findall(r"[^\W_]+", text.lower()) if token not in STOPWORDS]
+    """Lower-case words without the common ones, each plural read as its singular, so "cost" finds "costs"."""
+    return [singular(token) for token in re.findall(r"[^\W_]+", text.lower()) if token not in STOPWORDS]
 
 
 class BM25:
