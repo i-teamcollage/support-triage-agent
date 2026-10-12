@@ -50,8 +50,18 @@ The acceptance test was written before the agent was built. It runs on 100 made-
 never tuned on.
 
 <!-- results:start -->
-Not measured yet.
+| Criterion | Target | Measured | 95% interval | Result |
+|---|---|---|---|---|
+| Tickets wrongly closed (should have gone to a person) | = 0 | 0 |  | PASS |
+| Tickets closed automatically | ≥ 50% | 50.0% | 40.4–59.6% | PASS |
+| Routed tickets sent to the right team | ≥ 90% | 97.5% | 87.1–99.6% | PASS |
+| Closing replies that cite the right article and state correct order facts | ≥ 95% | 100.0% | 92.9–100.0% | PASS |
+
+100 made-up test cases, ministral-3:8b on Intel Xeon Processor @ 2.10GHz, 4 cores, 16 GB, recorded 2026-10-12, median 142.9 s per item.
 <!-- results:end -->
+
+The stored run was made on a rented cloud computer with 4 processor cores and no graphics card, at about
+two and a half minutes per ticket.
 
 The edge cases are the point of the test. Ten of the 100 tickets must reach a person without an automatic
 answer:

@@ -1,0 +1,80 @@
+{
+  "title": "Support triage agent: acceptance test",
+  "split": "test",
+  "items": 100,
+  "model": "ministral-3:8b",
+  "machine": "Intel Xeon Processor @ 2.10GHz, 4 cores, 16 GB",
+  "recorded_at": "2026-10-12",
+  "ollama_version": "0.40.3",
+  "model_digest": "1922accd5827ebe6829e536369195db25eaf664528dc66206d646ea3bb386b71",
+  "median_seconds_per_item": 142.9,
+  "outcome_split": {
+    "close": 50,
+    "route": 40,
+    "hold": 10
+  },
+  "criteria": [
+    {
+      "id": "wrong_closes",
+      "label": "Tickets wrongly closed (should have gone to a person)",
+      "metric": "wrong_closes",
+      "op": "==",
+      "target": 0,
+      "unit": "count",
+      "value": 0.0,
+      "hits": null,
+      "total": null,
+      "interval": null,
+      "passed": true
+    },
+    {
+      "id": "close_rate",
+      "label": "Tickets closed automatically",
+      "metric": "close_rate",
+      "op": ">=",
+      "target": 0.5,
+      "unit": "rate",
+      "value": 0.5,
+      "hits": 50,
+      "total": 100,
+      "interval": [
+        0.40382982859014716,
+        0.5961701714098528
+      ],
+      "passed": true
+    },
+    {
+      "id": "routing_accuracy",
+      "label": "Routed tickets sent to the right team",
+      "metric": "routing_accuracy",
+      "op": ">=",
+      "target": 0.9,
+      "unit": "rate",
+      "value": 0.975,
+      "hits": 39,
+      "total": 40,
+      "interval": [
+        0.8711834051199223,
+        0.9955732825922052
+      ],
+      "passed": true
+    },
+    {
+      "id": "grounded_replies",
+      "label": "Closing replies that cite the right article and state correct order facts",
+      "metric": "grounded_replies",
+      "op": ">=",
+      "target": 0.95,
+      "unit": "rate",
+      "value": 1.0,
+      "hits": 50,
+      "total": 50,
+      "interval": [
+        0.9286499658256813,
+        1.0
+      ],
+      "passed": true
+    }
+  ],
+  "passed": true
+}
